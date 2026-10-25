@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<link rel="icon" href="data:," />
+<title>FieldOps — Operations App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0c1f3f; --navy2:#12294f; --ink:#16233c; --muted:#66748e; --faint:#93a1b8;
+    --bg:#eef1f6; --card:#ffffff; --line:#e3e8f0;
+    --amber:#f5a301; --amber-d:#d98e00; --amber-soft:#fff4db;
+    --green:#12805c; --green-soft:#e2f4ec;
+    --red:#d64545; --red-soft:#fdecec;
+    --blue:#2563eb; --blue-soft:#e7eefc;
+    --teal:#0e7c86; --teal-soft:#e0f2f4;
+    --radius:18px;
+    --shadow:0 2px 10px rgba(12,31,63,.06), 0 1px 3px rgba(12,31,63,.05);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:'Inter',system-ui,sans-serif; color:var(--ink);
+    background:#081426;
+    background-image:radial-gradient(900px 500px at 15% -10%, rgba(245,163,1,.14), transparent 60%), radial-gradient(800px 600px at 110% 110%, rgba(37,99,235,.16), transparent 55%);
+    display:flex; align-items:center; justify-content:center; gap:56px;
+    min-height:100dvh; padding:28px 16px;
+  }
+  h1,h2,h3,.display{font-family:'Manrope',sans-serif;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+  input,select,textarea{font-family:inherit;}
+
+  /* ---------- Desktop side caption ---------- */
+  .side-cap{max-width:340px; color:#dbe4f3; display:none;}
+  @media (min-width:1080px){ .side-cap{display:block;} }
+  .side-cap .brandline{display:flex; align-items:center; gap:12px; margin-bottom:22px;}
+  .side-cap h1{font-size:34px; line-height:1.12; margin:0 0 14px; color:#fff; font-weight:800; letter-spacing:-.02em;}
+  .side-cap p{color:#a9b9d4; font-size:15px; line-height:1.65; margin:0 0 20px;}
+  .side-cap ul{list-style:none; margin:0 0 26px; padding:0; display:grid; gap:10px;}
+  .side-cap li{display:flex; gap:10px; align-items:flex-start; font-size:14px; color:#c9d6ec;}
+  .side-cap li svg{flex:none; margin-top:2px;}
+  .side-cap .cap-note{font-size:12.5px; color:#7e90b0; border-top:1px solid rgba(255,255,255,.12); padding-top:16px; line-height:1.6;}
+
+  /* ---------- Phone frame ---------- */
+  .phone{
+    position:relative; width:min(410px,100%); height:min(880px, calc(100dvh - 40px)); min-height:560px;
+    background:var(--bg); border-radius:46px; overflow:hidden; flex:none;
+    box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 0 10px #1b2a47, 0 0 0 12px #31456a;
+    display:flex; flex-direction:column;
+  }
+  @media (max-width:520px){
+    body{padding:0;}
+    .phone{width:100%; height:100dvh; min-height:0; border-radius:0; box-shadow:none;}
+  }
+  .notch{position:absolute; top:10px; left:50%; transform:translateX(-50%); width:104px; height:24px; background:#0a1526; border-radius:14px; z-index:60;}
+  @media (max-width:520px){ .notch{display:none;} }
+
+  /* ---------- App header ---------- */
+  .appbar{
+    background:var(--navy); color:#fff; padding:44px 18px 16px; flex:none; position:relative; z-index:20;
+  }
+  @media (max-width:520px){ .appbar{padding-top:calc(14px + env(safe-area-inset-top));} }
+  .appbar-row{display:flex; align-items:center; gap:11px;}
+  .logo-mark{
+    width:40px; height:40px; border-radius:12px; background:var(--amber); color:var(--navy);
+    display:grid; place-items:center; font-family:'Manrope'; font-weight:800; font-size:15px; letter-spacing:-.02em; flex:none;
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);
+  }
+  .brand-text{line-height:1.1; flex:1; min-width:0;}
+  .brand-text .bname{font-family:'Manrope'; font-weight:800; font-size:16.5px; letter-spacing:-.01em;}
+  .brand-text .bsub{font-size:11px; color:#9db1d1; font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-top:2px;}
+  .icon-btn{
+    width:38px; height:38px; border-radius:12px; background:rgba(255,255,255,.1); display:grid; place-items:center; position:relative; flex:none;
+  }
+  .icon-btn:active{background:rgba(255,255,255,.2);}
+  .icon-btn .dot{position:absolute; top:8px; right:9px; width:8px; height:8px; border-radius:50%; background:var(--amber); border:2px solid var(--navy);}
+  .avatar{
+    width:38px; height:38px; border-radius:50%; background:#e8edf5; color:var(--navy);
+    display:grid; place-items:center; font-weight:700; font-size:13px; flex:none; border:2px solid rgba(255,255,255,.35);
+  }
+
+  /* ---------- Content / screens ---------- */
+  .viewport{flex:1; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; scrollbar-width:none; position:relative;}
+  .viewport::-webkit-scrollbar{display:none;}
+  .screen{display:none; padding:18px 16px 28px; animation:fadeIn .22s ease;}
+  .screen.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion: reduce){ .screen{animation:none;} }
+
+  .greet{font-size:13px; color:var(--muted); font-weight:600;}
+  .greet-name{font-family:'Manrope'; font-size:23px; font-weight:800; letter-spacing:-.02em; margin:2px 0 4px;}
+  .demo-pill{display:inline-flex; align-items:center; gap:6px; background:var(--amber-soft); color:#8a5d00; font-size:11px; font-weight:700; padding:4px 9px; border-radius:99px; border:1px solid #f3d489;}
+  .demo-pill i{width:6px; height:6px; border-radius:50%; background:var(--amber); display:block;}
+
+  .searchbar{
+    margin-top:14px; display:flex; align-items:center; gap:9px; background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:0 13px; height:46px; box-shadow:var(--shadow);
+  }
+  .searchbar input{border:none; outline:none; flex:1; font-size:14.5px; background:none; color:var(--ink); min-width:0;}
+  .searchbar input::placeholder{color:var(--faint);}
+
+  /* score card */
+  .score-card{
+    margin-top:16px; background:var(--navy); border-radius:22px; color:#fff; padding:18px;
+    display:flex; gap:16px; align-items:center; position:relative; overflow:hidden;
+  }
+  .score-card::after{content:""; position:absolute; right:-34px; top:-34px; width:130px; height:130px; border-radius:50%; background:rgba(245,163,1,.16);}
+  .ring-wrap{position:relative; width:86px; height:86px; flex:none;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-num{position:absolute; inset:0; display:grid; place-items:center; font-family:'Manrope'; font-weight:800; font-size:21px;}
+  .ring-num small{font-size:11px; color:#9db1d1; display:block; text-align:center; font-weight:600;}
+  .score-info{flex:1; position:relative; z-index:1;}
+  .score-info h3{margin:0 0 4px; font-size:16px; font-weight:800;}
+  .score-info p{margin:0; font-size:12.5px; color:#b9c8e2; line-height:1.5;}
+  .score-info .trend{display:inline-flex; gap:5px; align-items:center; margin-top:9px; background:rgba(18,128,92,.35); color:#7fe3bb; font-size:11.5px; font-weight:700; padding:4px 8px; border-radius:99px;}
+
+  /* stat grid */
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px;}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); text-align:left; width:100%;}
+  .stat .s-ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; margin-bottom:9px;}
+  .stat .s-num{font-family:'Manrope'; font-size:22px; font-weight:800; letter-spacing:-.02em;}
+  .stat .s-lab{font-size:12px; color:var(--muted); font-weight:600; margin-top:1px;}
+  .stat .s-sub{font-size:11px; margin-top:5px; font-weight:700;}
+  .ic-amber{background:var(--amber-soft); color:var(--amber-d);}
+  .ic-green{background:var(--green-soft); color:var(--green);}
+  .ic-red{background:var(--red-soft); color:var(--red);}
+  .ic-blue{background:var(--blue-soft); color:var(--blue);}
+  .ic-teal{background:var(--teal-soft); color:var(--teal);}
+
+  .sec-head{display:flex; align-items:center; justify-content:space-between; margin:22px 2px 11px;}
+  .sec-head h3{margin:0; font-size:16px; font-weight:800; letter-spacing:-.01em;}
+  .sec-head button{font-size:12.5px; font-weight:700; color:var(--blue);}
+
+  /* quick actions */
+  .quick-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
+  .quick{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 4px 11px; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow:var(--shadow); font-size:11.5px; font-weight:700; color:var(--ink);}
+  .quick .q-ic{width:42px; height:42px; border-radius:14px; display:grid; place-items:center;}
+  .quick:active{transform:scale(.97);}
+
+  /* list cards */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:15px; margin-bottom:11px; width:100%; text-align:left;}
+  .card-row{display:flex; gap:12px; align-items:flex-start;}
+  .card-ic{width:44px; height:44px; border-radius:13px; display:grid; place-items:center; flex:none;}
+  .card-main{flex:1; min-width:0;}
+  .card-title{font-weight:700; font-size:14.5px; line-height:1.3;}
+  .card-meta{font-size:12px; color:var(--muted); margin-top:3px; line-height:1.45;}
+  .pill{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:800; letter-spacing:.03em; padding:3.5px 8px; border-radius:99px; text-transform:uppercase; white-space:nowrap;}
+  .pill-high{background:var(--red-soft); color:var(--red);}
+  .pill-med{background:var(--amber-soft); color:#8a5d00;}
+  .pill-low{background:var(--blue-soft); color:var(--blue);}
+  .pill-open{background:var(--amber-soft); color:#8a5d00;}
+  .pill-progress{background:var(--blue-soft); color:var(--blue);}
+  .pill-done{background:var(--green-soft); color:var(--green);}
+  .pill-overdue{background:var(--red-soft); color:var(--red);}
+  .pill-ok{background:var(--green-soft); color:var(--green);}
+  .pill-due{background:var(--amber-soft); color:#8a5d00;}
+  .pill-out{background:var(--red-soft); color:var(--red);}
+
+  .progress{height:7px; background:#e8edf4; border-radius:99px; overflow:hidden; margin-top:10px;}
+  .progress > i{display:block; height:100%; border-radius:99px; background:var(--blue); transition:width .35s ease;}
+  .progress.amber > i{background:var(--amber);}
+  .progress.green > i{background:var(--green);}
+  .prog-meta{display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); font-weight:600; margin-top:6px;}
+
+  .assignee{display:flex; align-items:center; gap:7px; margin-top:9px;}
+  .mini-av{width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-size:9.5px; font-weight:800; color:#fff; flex:none;}
+  .assignee span{font-size:12px; color:var(--muted); font-weight:600;}
+  .due-chip{margin-left:auto; font-size:11.5px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:4px;}
+  .due-chip.late{color:var(--red);}
+
+  /* chips */
+  .chips{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 8px; scrollbar-width:none;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{flex:none; padding:8px 14px; border-radius:99px; background:var(--card); border:1px solid var(--line); font-size:13px; font-weight:700; color:var(--muted);}
+  .chip.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  .screen-title{font-family:'Manrope'; font-size:22px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px;}
+  .screen-sub{font-size:13px; color:var(--muted); margin:0 0 14px; line-height:1.5;}
+
+  /* CTA */
+  .cta{
+    width:100%; background:var(--amber); color:var(--navy); font-weight:800; font-size:15px;
+    border-radius:15px; padding:15px; display:flex; align-items:center; justify-content:center; gap:9px;
+    box-shadow:0 8px 18px rgba(245,163,1,.32);
+  }
+  .cta:active{transform:scale(.985);}
+  .cta:disabled{opacity:.45; box-shadow:none;}
+  .cta.navy{background:var(--navy); color:#fff; box-shadow:0 8px 18px rgba(12,31,63,.25);}
+  .cta.ghost{background:var(--card); color:var(--ink); border:1px solid var(--line); box-shadow:var(--shadow);}
+
+  /* bottom nav */
+  .tabbar{
+    flex:none; background:#fff; border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(5,1fr);
+    padding:8px 6px calc(10px + env(safe-area-inset-bottom)); position:relative; z-index:20;
+  }
+  .tab{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:700; color:var(--faint); padding:5px 0 2px; border-radius:12px; position:relative;}
+  .tab.on{color:var(--navy);}
+  .tab.on::before{content:""; position:absolute; top:-9px; width:26px; height:3px; border-radius:99px; background:var(--amber);}
+  .tab .bdg{position:absolute; top:0; right:calc(50% - 19px); background:var(--red); color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:99px; display:grid; place-items:center; padding:0 4px;}
+
+  /* back header for sub-screens */
+  .subbar{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .back-btn{width:36px; height:36px; border-radius:11px; background:var(--card); border:1px solid var(--line); display:grid; place-items:center; flex:none; box-shadow:var(--shadow);}
+  .subbar h2{font-size:18px; margin:0; font-weight:800; letter-spacing:-.01em; flex:1;}
+  .subbar .sub-meta{font-size:11.5px; color:var(--muted); font-weight:600;}
+
+  /* checklist */
+  .check-section{font-size:11.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); margin:18px 2px 9px;}
+  .check-item{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:10px; box-shadow:var(--shadow);}
+  .check-q{font-weight:700; font-size:14px; line-height:1.4;}
+  .check-hint{font-size:12px; color:var(--muted); margin-top:3px; line-height:1.45;}
+  .seg{display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:11px;}
+  .seg button{padding:10px 0; border-radius:11px; border:1.5px solid var(--line); font-weight:800; font-size:13px; color:var(--muted); background:#fbfcfe;}
+  .seg button.sel-pass{background:var(--green); border-color:var(--green); color:#fff;}
+  .seg button.sel-fail{background:var(--red); border-color:var(--red); color:#fff;}
+  .seg button.sel-na{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .fail-note{display:none; margin-top:10px; background:var(--red-soft); color:#8f2b2b; font-size:12px; font-weight:600; border-radius:10px; padding:9px 11px; line-height:1.45;}
+  .fail-note.show{display:block;}
+  .evidence-row{display:flex; gap:8px; margin-top:10px;}
+  .ev-btn{flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:700; color:var(--muted); border:1px dashed #c6d0e0; border-radius:10px; padding:9px 0; background:#fbfcfe;}
+  .ev-btn.added{border-style:solid; border-color:var(--green); color:var(--green); background:var(--green-soft);}
+
+  /* sheets & overlays */
+  .sheet-veil{position:absolute; inset:0; background:rgba(8,20,38,.55); z-index:70; opacity:0; pointer-events:none; transition:opacity .25s;}
+  .sheet-veil.open{opacity:1; pointer-events:auto;}
+  .sheet{
+    position:absolute; left:0; right:0; bottom:0; z-index:71; background:#fff; border-radius:26px 26px 0 0;
+    padding:12px 20px calc(22px + env(safe-area-inset-bottom)); transform:translateY(105%); transition:transform .3s cubic-bezier(.32,.9,.35,1);
+    max-height:88%; overflow-y:auto;
+  }
+  .sheet.open{transform:none;}
+  .sheet .grab{width:42px; height:5px; border-radius:99px; background:#dbe2ee; margin:2px auto 16px;}
+  .sheet h3{margin:0 0 4px; font-size:18px; font-weight:800;}
+  .sheet .sh-sub{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.5;}
+  .field{margin-bottom:13px;}
+  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 13px; font-size:14.5px; outline:none; background:#fbfcfe; color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--amber);}
+  .field .err{display:none; color:var(--red); font-size:12px; font-weight:600; margin-top:5px;}
+  .field.invalid input{border-color:var(--red);}
+  .field.invalid .err{display:block;}
+
+  .notif-item{display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--line);}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item p{margin:0; font-size:13.5px; line-height:1.5;}
+  .notif-item .n-time{font-size:11.5px; color:var(--faint); font-weight:600; margin-top:2px;}
+
+  /* scanner */
+  .scanner{position:absolute; inset:0; z-index:80; background:#0a1526; color:#fff; display:none; flex-direction:column; align-items:center; padding:70px 28px 34px;}
+  .scanner.open{display:flex;}
+  .scan-frame{width:230px; height:230px; border-radius:26px; border:2px solid rgba(255,255,255,.25); position:relative; margin:34px 0 26px; display:grid; place-items:center;}
+  .scan-frame::before,.scan-frame::after{content:""; position:absolute; width:44px; height:44px; border:4px solid var(--amber);}
+  .scan-frame::before{top:-4px; left:-4px; border-right:none; border-bottom:none; border-radius:26px 0 0 0;}
+  .scan-frame::after{bottom:-4px; right:-4px; border-left:none; border-top:none; border-radius:0 0 26px 0;}
+  .scan-line{position:absolute; left:14px; right:14px; height:3px; border-radius:99px; background:var(--amber); box-shadow:0 0 18px var(--amber); animation:scanMove 1.6s ease-in-out infinite alternate;}
+  @keyframes scanMove{from{top:16px;} to{top:calc(100% - 19px);}}
+  @media (prefers-reduced-motion: reduce){ .scan-line{animation:none; top:50%;} }
+
+  /* success overlay */
+  .success{position:absolute; inset:0; z-index:85; background:var(--bg); display:none; flex-direction:column; align-items:center; justify-content:center; padding:34px; text-align:center;}
+  .success.open{display:flex;}
+  .success .tick{width:88px; height:88px; border-radius:50%; background:var(--green-soft); display:grid; place-items:center; margin-bottom:20px;}
+  .success h2{margin:0 0 8px; font-size:24px; font-weight:800;}
+  .success p{color:var(--muted); font-size:14px; line-height:1.6; margin:0 0 8px;}
+  .success .big-score{font-family:'Manrope'; font-size:44px; font-weight:800; color:var(--navy); margin:10px 0 2px;}
+  .success .score-lab{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin-bottom:24px;}
+
+  /* toast */
+  .toast{
+    position:absolute; left:50%; bottom:104px; transform:translate(-50%, 16px); z-index:90; background:var(--navy); color:#fff;
+    font-size:13.5px; font-weight:700; padding:12px 18px; border-radius:13px; opacity:0; pointer-events:none; transition:.28s;
+    box-shadow:0 14px 30px rgba(8,20,38,.35); display:flex; gap:8px; align-items:center; max-width:86%; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+
+  /* chart */
+  .chart-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin-bottom:12px;}
+  .chart-card h4{margin:0 0 3px; font-size:14.5px; font-weight:800;}
+  .chart-card .c-sub{font-size:12px; color:var(--muted); margin-bottom:12px;}
+  .bars{display:flex; align-items:flex-end; gap:10px; height:110px; padding-top:6px;}
+  .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; height:100%; justify-content:flex-end;}
+  .bar-col .bar{width:100%; max-width:30px; border-radius:7px 7px 3px 3px; background:var(--navy);}
+  .bar-col .bar.amber{background:var(--amber);}
+  .bar-col span{font-size:10.5px; font-weight:700; color:var(--faint);}
+  .bar-col b{font-size:11px;}
+
+  .menu-item{display:flex; align-items:center; gap:13px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:15px; margin-bottom:11px; box-shadow:var(--shadow); width:100%; text-align:left;}
+  .menu-item .m-txt{flex:1;}
+  .menu-item .m-t{font-weight:700; font-size:14.5px;}
+  .menu-item .m-s{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  .qr-box{width:64px; height:64px; border-radius:12px; background:
+    conic-gradient(from 90deg at 20% 20%, #16233c 90deg, transparent 0) 0 0/16px 16px,
+    conic-gradient(from 180deg at 80% 30%, #16233c 90deg, transparent 0) 8px 4px/14px 14px,
+    #eef1f6; border:1px solid var(--line); flex:none;}
+
+  .fab{
+    position:absolute; right:16px; bottom:104px; z-index:40; width:54px; height:54px; border-radius:18px;
+    background:var(--amber); color:var(--navy); display:none; place-items:center; box-shadow:0 12px 24px rgba(245,163,1,.4);
+  }
+  .fab.show{display:grid;}
+  .empty-note{text-align:center; color:var(--muted); font-size:13.5px; padding:26px 10px; line-height:1.6;}
+  a{color:var(--blue);}
+  :focus-visible{outline:2.5px solid var(--amber); outline-offset:2px;}
+
+  /* ---------- Desktop: full app shell (no phone mockup, no landing page) ---------- */
+  @media (min-width:900px){
+    body{padding:0;}
+    .side-cap{display:none !important;}
+    .phone{
+      width:100%; height:100dvh; min-height:0; border-radius:0; box-shadow:none;
+      display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto 1fr;
+      grid-template-areas:"bar bar" "nav main";
+    }
+    .notch{display:none;}
+    .appbar{grid-area:bar; padding:15px 24px;}
+    .appbar-row{max-width:none;}
+    .brand-text .bname{font-size:18px;}
+    .viewport{grid-area:main;}
+    .tabbar{
+      grid-area:nav; display:flex; flex-direction:column; gap:4px; justify-content:flex-start;
+      padding:20px 12px; border-top:none; border-right:1px solid var(--line);
+    }
+    .tab{flex-direction:row; justify-content:flex-start; gap:11px; font-size:13.5px; padding:12px 14px;}
+    .tab.on{background:#e9eef7;}
+    .tab.on::before{display:none;}
+    .tab .bdg{position:static; margin-left:auto;}
+    .screen{max-width:1120px; margin:0 auto; padding:28px 32px 48px;}
+    #scr-runner, #scr-more, #scr-asset{max-width:800px;}
+    .greet-name{font-size:27px;}
+    .stat-grid{grid-template-columns:repeat(4,1fr);}
+    #scr-asset .stat-grid{grid-template-columns:1fr 1fr;}
+    .quick-grid{max-width:600px;}
+    #templateList, #actionList, #assetList, #courseList, #homeActions, #completedList{
+      display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;
+    }
+    #templateList .card, #actionList .card, #assetList .card, #courseList .card, #homeActions .card, #completedList .card{margin-bottom:0;}
+    .sheet{left:50%; right:auto; width:min(560px,100%); transform:translate(-50%,105%);}
+    .sheet.open{transform:translate(-50%,0);}
+    .fab{bottom:30px; right:30px;}
+    .toast{bottom:34px;}
+    .check-item{padding:17px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="notch"></div>
+
+  <!-- App bar -->
+  <header class="appbar">
+    <div class="appbar-row">
+      <div class="logo-mark" aria-hidden="true">FO</div>
+      <div class="brand-text">
+        <div class="bname">FieldOps</div>
+        <div class="bsub">Operations</div>
+      </div>
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications, 3 unread">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <div class="avatar" aria-hidden="true">AR</div>
+    </div>
+  </header>
+
+  <div class="viewport" id="viewport">
+
+    <!-- ============ HOME ============ -->
+    <section class="screen active" id="scr-home">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div>
+          <div class="greet">Sunday 25 October · Riverside Site</div>
+          <div class="greet-name">Good evening, Alex</div>
+        </div>
+        <span class="demo-pill"><i></i>Demo data</span>
+      </div>
+
+      <div class="searchbar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="homeSearch" type="search" placeholder="Search inspections, assets, actions…" aria-label="Search">
+      </div>
+
+      <div class="score-card">
+        <div class="ring-wrap">
+          <svg width="86" height="86" viewBox="0 0 86 86">
+            <circle cx="43" cy="43" r="36" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="8"/>
+            <circle cx="43" cy="43" r="36" fill="none" stroke="#f5a301" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="32"/>
+          </svg>
+          <div class="ring-num"><div>86%<small>score</small></div></div>
+        </div>
+        <div class="score-info">
+          <h3>Site compliance</h3>
+          <p>Across 24 inspections completed in the last 30 days.</p>
+          <span class="trend"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>Up 4% this month</span>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <button class="quick" data-goto="inspections"><span class="q-ic ic-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span>Inspect</button>
+        <button class="quick" id="quickReport"><span class="q-ic ic-red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Report issue</button>
+        <button class="quick" id="quickScan"><span class="q-ic ic-teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span>Scan asset</button>
+        <button class="quick" data-goto="training"><span class="q-ic ic-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>Training</button>
+      </div>
+
+      <div class="stat-grid">
+        <button class="stat" data-goto="inspections">
+          <span class="s-ic ic-amber"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span>
+          <div class="s-num">6</div><div class="s-lab">Inspections due today</div>
+          <div class="s-sub" style="color:var(--green);">2 already completed</div>
+        </button>
+        <button class="stat" data-goto="actions">
+          <span class="s-ic ic-red"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+          <div class="s-num" id="openActionCount">9</div><div class="s-lab">Open actions</div>
+          <div class="s-sub" style="color:var(--red);">3 overdue</div>
+        </button>
+        <button class="stat" data-goto="assets">
+          <span class="s-ic ic-teal"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span>
+          <div class="s-num">128</div><div class="s-lab">Assets tracked</div>
+          <div class="s-sub" style="color:#8a5d00;">5 due for service</div>
+        </button>
+        <button class="stat" data-goto="training">
+          <span class="s-ic ic-blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>
+          <div class="s-num">82%</div><div class="s-lab">Training complete</div>
+          <div class="s-sub" style="color:var(--blue);">2 courses in progress</div>
+        </button>
+      </div>
+
+      <div class="sec-head"><h3>In progress</h3><button data-goto="inspections">See all</button></div>
+
+      <button class="card" id="resumeCard">
+        <div class="card-row">
+          <span class="card-ic ic-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <div class="card-main">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+              <div class="card-title">Site Safety Inspection</div><span class="pill pill-progress">In progress</span>
+            </div>
+            <div class="card-meta">Riverside Site · Started 09:41 · Template v3.2</div>
+            <div class="progress amber"><i id="resumeBar" style="width:38%"></i></div>
+            <div class="prog-meta"><span id="resumeText">3 of 8 checks answered</span><span>Due today</span></div>
+          </div>
+        </div>
+      </button>
+
+      <button class="card" data-start-template="Vehicle Daily Check">
+        <div class="card-row">
+          <span class="card-ic ic-teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14"/><path d="M6.5 17 8 10h8l1.5 7"/><circle cx="7.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/><path d="M9 10V7h6v3"/></svg></span>
+          <div class="card-main">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+              <div class="card-title">Vehicle Daily Check</div><span class="pill pill-open">Not started</span>
+            </div>
+            <div class="card-meta">Transit Van · Reg YK24 DBO · Depot Yard</div>
+            <div class="prog-meta"><span>12 checks · ~5 min</span><span>Due 17:00</span></div>
+          </div>
+        </div>
+      </button>
+
+      <div class="sec-head"><h3>Assigned to you</h3><button data-goto="actions">All actions</button></div>
+      <div id="homeActions"></div>
+
+      <div class="sec-head"><h3>Recent activity</h3></div>
+      <div class="card" style="cursor:default;">
+        <div class="notif-item" style="padding-top:2px;">
+          <span class="card-ic ic-green" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div><p><b>Sarah M.</b> completed the Fire Safety Check — scored <b>100%</b>.</p><div class="n-time">Today · 11:02</div></div>
+        </div>
+        <div class="notif-item">
+          <span class="card-ic ic-red" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
+          <div><p><b>James O.</b> raised an issue: damaged guard rail, Level 2 scaffold.</p><div class="n-time">Today · 10:17</div></div>
+        </div>
+        <div class="notif-item" style="padding-bottom:2px;">
+          <span class="card-ic ic-blue" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>
+          <div><p><b>You</b> completed Manual Handling — module 3 of 4.</p><div class="n-time">Yesterday · 16:48</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INSPECTIONS ============ -->
+    <section class="screen" id="scr-inspections">
+      <h2 class="screen-title">Inspections</h2>
+      <p class="screen-sub">Start from a template, answer the checklist, add photo evidence — failed items create actions automatically.</p>
+      <div class="searchbar" style="margin-top:0;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="templateSearch" type="search" placeholder="Search templates…" aria-label="Search templates">
+      </div>
+      <div class="chips" style="margin-top:12px;" id="templateChips">
+        <button class="chip on" data-tcat="all">All</button>
+        <button class="chip" data-tcat="safety">Safety</button>
+        <button class="chip" data-tcat="vehicles">Vehicles</button>
+        <button class="chip" data-tcat="quality">Quality</button>
+        <button class="chip" data-tcat="facilities">Facilities</button>
+      </div>
+      <div id="templateList"></div>
+      <div class="sec-head"><h3>Recently completed</h3></div>
+      <div id="completedList">
+        <div class="card" style="cursor:default;">
+          <div class="card-row">
+            <span class="card-ic ic-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <div class="card-main">
+              <div style="display:flex;justify-content:space-between;gap:8px;"><div class="card-title">Fire Safety Check</div><span class="pill pill-done">100%</span></div>
+              <div class="card-meta">Sarah M. · Head Office · Today 11:02</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="cursor:default;">
+          <div class="card-row">
+            <span class="card-ic ic-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <div class="card-main">
+              <div style="display:flex;justify-content:space-between;gap:8px;"><div class="card-title">Warehouse Inspection</div><span class="pill pill-done">92%</span></div>
+              <div class="card-meta">James O. · North Depot · Yesterday 15:36 · 1 action raised</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INSPECTION RUNNER ============ -->
+    <section class="screen" id="scr-runner">
+      <div class="subbar">
+        <button class="back-btn" data-goto="inspections" aria-label="Back to inspections"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2 id="runnerTitle">Site Safety Inspection</h2>
+        <span class="sub-meta" id="runnerCount">0/8</span>
+      </div>
+      <div class="card" style="cursor:default; padding:13px 15px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);"><span>Riverside Site · Alex R.</span><span id="runnerPct">0% answered</span></div>
+        <div class="progress amber" style="margin-top:9px;"><i id="runnerBar" style="width:0%"></i></div>
+      </div>
+      <div id="checklist"></div>
+      <button class="cta navy" id="submitInspection" disabled style="margin-top:16px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Submit inspection
+      </button>
+      <p style="text-align:center;font-size:12px;color:var(--faint);margin:12px 6px 0;line-height:1.55;">Works offline in the real app — answers sync when you're back in signal. Failed items raise an action for the site manager.</p>
+    </section>
+
+    <!-- ============ ACTIONS ============ -->
+    <section class="screen" id="scr-actions">
+      <h2 class="screen-title">Issues &amp; Actions</h2>
+      <p class="screen-sub">Everything raised from inspections and issue reports, in one place — with owners, priorities and due dates.</p>
+      <div class="chips" id="actionChips">
+        <button class="chip on" data-afilter="all">All</button>
+        <button class="chip" data-afilter="open">Open</button>
+        <button class="chip" data-afilter="overdue">Overdue</button>
+        <button class="chip" data-afilter="mine">Assigned to me</button>
+        <button class="chip" data-afilter="done">Done</button>
+      </div>
+      <div id="actionList"></div>
+    </section>
+
+    <!-- ============ ASSETS ============ -->
+    <section class="screen" id="scr-assets">
+      <h2 class="screen-title">Assets</h2>
+      <p class="screen-sub">Plant, vehicles and equipment — scan a QR code on site to open its record, history and service dates.</p>
+      <button class="cta" id="scanBtn2" style="margin-bottom:16px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
+        Scan QR code
+      </button>
+      <div class="chips" id="assetChips">
+        <button class="chip on" data-acat="all">All assets</button>
+        <button class="chip" data-acat="ok">Operational</button>
+        <button class="chip" data-acat="due">Due service</button>
+        <button class="chip" data-acat="out">Out of service</button>
+      </div>
+      <div id="assetList"></div>
+    </section>
+
+    <!-- ============ ASSET DETAIL ============ -->
+    <section class="screen" id="scr-asset">
+      <div class="subbar">
+        <button class="back-btn" data-goto="assets" aria-label="Back to assets"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2 id="assetTitle">Asset</h2>
+        <span class="pill pill-ok" id="assetStatus">Operational</span>
+      </div>
+      <div class="card" style="cursor:default;">
+        <div class="card-row">
+          <div class="qr-box" aria-hidden="true"></div>
+          <div class="card-main">
+            <div class="card-title" id="assetCode">AST-0142</div>
+            <div class="card-meta" id="assetMeta">—</div>
+            <div class="card-meta" id="assetLoc" style="margin-top:6px;">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-grid" style="margin-top:0;">
+        <div class="stat"><div class="s-num" style="font-size:17px;" id="assetService">—</div><div class="s-lab">Next service due</div></div>
+        <div class="stat"><div class="s-num" style="font-size:17px;" id="assetLast">—</div><div class="s-lab">Last inspection</div></div>
+      </div>
+      <div class="sec-head"><h3>History</h3></div>
+      <div class="card" style="cursor:default;" id="assetHistory"></div>
+      <button class="cta navy" id="assetInspectBtn" style="margin-top:6px;">Start pre-start inspection</button>
+      <button class="cta ghost" id="assetIssueBtn" style="margin-top:10px;">Report an issue with this asset</button>
+    </section>
+
+    <!-- ============ TRAINING ============ -->
+    <section class="screen" id="scr-training">
+      <div class="subbar" id="trainingBack" style="display:none;">
+        <button class="back-btn" data-goto="more" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2>Training</h2>
+      </div>
+      <h2 class="screen-title" id="trainingTitle">Training</h2>
+      <p class="screen-sub">Short courses your team can finish on their phones — progress and certificates tracked for compliance.</p>
+      <div class="score-card" style="margin-top:2px; background:var(--navy2);">
+        <div class="ring-wrap" style="width:72px;height:72px;">
+          <svg width="72" height="72" viewBox="0 0 86 86">
+            <circle cx="43" cy="43" r="36" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="9"/>
+            <circle cx="43" cy="43" r="36" fill="none" stroke="#f5a301" stroke-width="9" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="41"/>
+          </svg>
+          <div class="ring-num" style="font-size:18px;"><div>82%</div></div>
+        </div>
+        <div class="score-info">
+          <h3>Team compliance</h3>
+          <p>41 of 50 assigned courses completed across your team.</p>
+        </div>
+      </div>
+      <div class="sec-head"><h3>Continue learning</h3></div>
+      <div id="courseList"></div>
+      <div class="sec-head"><h3>Certificates</h3></div>
+      <div class="card" style="cursor:default;">
+        <div class="card-row">
+          <span class="card-ic ic-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg></span>
+          <div class="card-main">
+            <div class="card-title">Fire Awareness — Certificate</div>
+            <div class="card-meta">Issued 12 Sep 2026 · Valid until Sep 2027 · Ref CERT-2214</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="cursor:default;">
+        <div class="card-row">
+          <span class="card-ic ic-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg></span>
+          <div class="card-main">
+            <div class="card-title">Site Induction — Certificate</div>
+            <div class="card-meta">Issued 28 Aug 2026 · Valid until Aug 2027 · Ref CERT-1987</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REPORTS ============ -->
+    <section class="screen" id="scr-reports">
+      <div class="subbar">
+        <button class="back-btn" data-goto="more" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <h2>Reports &amp; Analytics</h2>
+      </div>
+      <p class="screen-sub">Live view of inspection performance across all sites — the same data managers see on desktop.</p>
+      <div class="chart-card">
+        <h4>Inspections completed</h4>
+        <div class="c-sub">Per week · last 6 weeks · all sites</div>
+        <div class="bars">
+          <div class="bar-col"><b>18</b><div class="bar" style="height:52%"></div><span>Wk 1</span></div>
+          <div class="bar-col"><b>24</b><div class="bar" style="height:70%"></div><span>Wk 2</span></div>
+          <div class="bar-col"><b>21</b><div class="bar" style="height:61%"></div><span>Wk 3</span></div>
+          <div class="bar-col"><b>29</b><div class="bar" style="height:85%"></div><span>Wk 4</span></div>
+          <div class="bar-col"><b>26</b><div class="bar" style="height:76%"></div><span>Wk 5</span></div>
+          <div class="bar-col"><b>32</b><div class="bar amber" style="height:96%"></div><span>Wk 6</span></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4>Average inspection score</h4>
+        <div class="c-sub">Trend · last 6 months</div>
+        <svg viewBox="0 0 320 110" style="width:100%;height:auto;display:block;" role="img" aria-label="Score trend rising from 74 percent to 86 percent">
+          <line x1="8" y1="98" x2="312" y2="98" stroke="#e3e8f0" stroke-width="1.5"/>
+          <line x1="8" y1="56" x2="312" y2="56" stroke="#eef1f6" stroke-width="1.5"/>
+          <line x1="8" y1="16" x2="312" y2="16" stroke="#eef1f6" stroke-width="1.5"/>
+          <polyline points="16,72 72,64 128,68 184,50 240,42 300,28" fill="none" stroke="#f5a301" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="16" cy="72" r="4.5" fill="#0c1f3f"/><circle cx="72" cy="64" r="4.5" fill="#0c1f3f"/><circle cx="128" cy="68" r="4.5" fill="#0c1f3f"/><circle cx="184" cy="50" r="4.5" fill="#0c1f3f"/><circle cx="240" cy="42" r="4.5" fill="#0c1f3f"/><circle cx="300" cy="28" r="5.5" fill="#f5a301" stroke="#0c1f3f" stroke-width="2"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--faint);margin-top:4px;"><span>May · 74%</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct · 86%</span></div>
+      </div>
+      <div class="chart-card">
+        <h4>Most failed checks</h4>
+        <div class="c-sub">Last 30 days · where to focus coaching</div>
+        <div style="display:grid;gap:12px;">
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;"><span>PPE worn correctly</span><span style="color:var(--red);">14 fails</span></div><div class="progress" style="margin-top:6px;"><i style="width:78%;background:var(--red);"></i></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;"><span>Housekeeping &amp; walkways</span><span style="color:var(--red);">11 fails</span></div><div class="progress" style="margin-top:6px;"><i style="width:61%;background:var(--red);"></i></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;"><span>Fire exit signage</span><span style="color:#8a5d00;">7 fails</span></div><div class="progress" style="margin-top:6px;"><i style="width:39%;background:var(--amber);"></i></div></div>
+        </div>
+      </div>
+      <button class="cta ghost" id="exportBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+        Export report (PDF)
+      </button>
+    </section>
+
+    <!-- ============ MORE ============ -->
+    <section class="screen" id="scr-more">
+      <div class="card" style="cursor:default; background:var(--navy); border-color:var(--navy); color:#fff;">
+        <div class="card-row" style="align-items:center;">
+          <div class="avatar" style="width:52px;height:52px;font-size:16px;">AR</div>
+          <div class="card-main">
+            <div class="card-title" style="color:#fff;">Alex Reed</div>
+            <div class="card-meta" style="color:#9db1d1;">Site Supervisor · Riverside Site<br>alex.reed@example.co.uk</div>
+          </div>
+        </div>
+      </div>
+      <button class="menu-item" data-goto="training">
+        <span class="card-ic ic-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>
+        <span class="m-txt"><span class="m-t">Training</span><div class="m-s">Courses, progress &amp; certificates</div></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="menu-item" data-goto="reports">
+        <span class="card-ic ic-teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v3"/><path d="M12 10v8"/><path d="M17 6v12"/></svg></span>
+        <span class="m-txt"><span class="m-t">Reports &amp; Analytics</span><div class="m-s">Scores, trends &amp; exports</div></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="menu-item" id="syncBtn">
+        <span class="card-ic ic-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></span>
+        <span class="m-txt"><span class="m-t">Offline sync</span><div class="m-s" id="syncText">All data synced · Just now</div></span>
+        <span class="pill pill-done">On</span>
+      </button>
+      <button class="menu-item" id="teamBtn">
+        <span class="card-ic ic-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="m-txt"><span class="m-t">Team &amp; Sites</span><div class="m-s">24 team members · 3 sites</div></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="menu-item" id="settingsBtn">
+        <span class="card-ic" style="background:#eef1f6;color:var(--muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+        <span class="m-txt"><span class="m-t">Settings</span><div class="m-s">Notifications, account &amp; branding</div></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93a1b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div class="card" style="cursor:default; margin-top:18px;">
+        <div style="display:flex;align-items:center;gap:11px;">
+          <div class="logo-mark" style="width:36px;height:36px;font-size:13px;border-radius:10px;">FO</div>
+          <div>
+            <div style="font-weight:800;font-size:13.5px;">FieldOps — Operations</div>
+            <div style="font-size:12px;color:var(--muted);">Concept prototype v1.0 · Demo data</div>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:12px 0 0;">This prototype carries placeholder branding. In the production build, the app ships with your company's own name, logo and colours, your templates, and your team's accounts.</p>
+      </div>
+      <button class="cta ghost" id="signOutBtn" style="color:var(--red);">Sign out</button>
+    </section>
+  </div>
+
+  <!-- FAB for actions screen -->
+  <button class="fab" id="actionFab" aria-label="Report a new issue">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+  </button>
+
+  <!-- Bottom tab bar -->
+  <nav class="tabbar" aria-label="Main">
+    <button class="tab on" data-tab="home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/></svg>Home</button>
+    <button class="tab" data-tab="inspections"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Inspections</button>
+    <button class="tab" data-tab="actions"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 8v5"/><path d="M12 16.5h.01"/></svg>Actions<span class="bdg" id="tabBadge">9</span></button>
+    <button class="tab" data-tab="assets"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Assets</button>
+    <button class="tab" data-tab="more"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg>More</button>
+  </nav>
+
+  <!-- Sheets -->
+  <div class="sheet-veil" id="veil"></div>
+
+  <div class="sheet" id="notifSheet" role="dialog" aria-label="Notifications">
+    <div class="grab"></div>
+    <h3>Notifications</h3>
+    <p class="sh-sub">3 unread</p>
+    <div class="notif-item">
+      <span class="card-ic ic-red" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+      <div><p><b>Action overdue:</b> Replace damaged guard rail — due yesterday.</p><div class="n-time">2h ago · Riverside Site</div></div>
+    </div>
+    <div class="notif-item">
+      <span class="card-ic ic-amber" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span>
+      <div><p><b>Inspection assigned:</b> Vehicle Daily Check is due by 17:00 today.</p><div class="n-time">4h ago · Depot Yard</div></div>
+    </div>
+    <div class="notif-item">
+      <span class="card-ic ic-blue" style="width:38px;height:38px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>
+      <div><p><b>Training reminder:</b> Working at Height expires in 14 days — renew now.</p><div class="n-time">Yesterday · Training</div></div>
+    </div>
+    <button class="cta ghost" id="notifClose" style="margin-top:16px;">Mark all as read</button>
+  </div>
+
+  <div class="sheet" id="issueSheet" role="dialog" aria-label="Report an issue">
+    <div class="grab"></div>
+    <h3>Report an issue</h3>
+    <p class="sh-sub">It will be added to Issues &amp; Actions and assigned for follow-up.</p>
+    <form id="issueForm" novalidate>
+      <div class="field" id="fTitle">
+        <label for="issueTitle">What's the issue?</label>
+        <input id="issueTitle" type="text" placeholder="e.g. Leaking pipe in plant room" autocomplete="off">
+        <div class="err">Please describe the issue.</div>
+      </div>
+      <div class="field">
+        <label for="issueLoc">Location</label>
+        <input id="issueLoc" type="text" placeholder="e.g. Riverside Site · Level 2" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="issuePri">Priority</label>
+        <select id="issuePri">
+          <option value="high">High — needs attention today</option>
+          <option value="med" selected>Medium — this week</option>
+          <option value="low">Low — when convenient</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="issueAssign">Assign to</label>
+        <select id="issueAssign">
+          <option>Me (Alex R.)</option>
+          <option>Sarah M. — Site Manager</option>
+          <option>James O. — Supervisor</option>
+          <option>Priya K. — H&amp;S Lead</option>
+        </select>
+      </div>
+      <button type="button" class="ev-btn" id="issuePhotoBtn" style="width:100%;margin-bottom:14px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        Add photo evidence
+      </button>
+      <button type="submit" class="cta">Submit issue</button>
+    </form>
+  </div>
+
+  <!-- Scanner overlay -->
+  <div class="scanner" id="scanner">
+    <div style="font-family:'Manrope';font-weight:800;font-size:19px;">Scan asset QR code</div>
+    <p style="color:#9db1d1;font-size:13.5px;margin:8px 0 0;text-align:center;line-height:1.55;">Point the camera at the QR label on the asset.<br>(Simulated in this prototype)</p>
+    <div class="scan-frame">
+      <div class="scan-line"></div>
+      <svg width="74" height="74" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.4"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3z"/><path d="M21 14v.01"/><path d="M14 21v.01"/><path d="M18 18h3v3h-3z"/></svg>
+    </div>
+    <button class="cta" id="scanSimBtn" style="max-width:280px;">Simulate scan</button>
+    <button id="scanCancel" style="color:#c9d6ec;font-weight:700;font-size:14.5px;margin-top:18px;padding:10px;">Cancel</button>
+  </div>
+
+  <!-- Success overlay -->
+  <div class="success" id="successOverlay">
+    <div class="tick"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#12805c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h2>Inspection submitted</h2>
+    <div class="big-score" id="successScore">—</div>
+    <div class="score-lab">Inspection score</div>
+    <p id="successText">Your answers have been recorded.</p>
+    <button class="cta navy" id="successDone" style="max-width:280px;margin-top:16px;">Back to Home</button>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var viewport = document.getElementById('viewport');
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f5a301" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' + msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- Navigation ---------- */
+  var mainTabs = ['home','inspections','actions','assets','more'];
+  var fab = document.getElementById('actionFab');
+  function go(name){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    var el = document.getElementById('scr-' + name);
+    if(el) el.classList.add('active');
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-tab') === name); });
+    fab.classList.toggle('show', name === 'actions');
+    document.getElementById('trainingBack').style.display = (name === 'training') ? 'flex' : 'none';
+    document.getElementById('trainingTitle').style.display = (name === 'training') ? 'none' : 'block';
+    viewport.scrollTop = 0;
+  }
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){ go(t.getAttribute('data-tab')); });
+  });
+  document.querySelectorAll('[data-goto]').forEach(function(b){
+    b.addEventListener('click', function(){ go(b.getAttribute('data-goto')); });
+  });
+
+  /* ---------- Data ---------- */
+  var templates = [
+    {name:'Site Safety Inspection', cat:'safety', checks:8, mins:10, last:'In progress now', loc:'All sites', icon:'shield', tone:'ic-amber'},
+    {name:'Fire Safety Check', cat:'safety', checks:14, mins:12, last:'Completed today', loc:'Head Office', icon:'flame', tone:'ic-red'},
+    {name:'Vehicle Daily Check', cat:'vehicles', checks:12, mins:5, last:'Due today 17:00', loc:'Depot Yard', icon:'truck', tone:'ic-teal'},
+    {name:'Forklift Pre-Start Check', cat:'vehicles', checks:10, mins:6, last:'Yesterday', loc:'North Depot', icon:'truck', tone:'ic-teal'},
+    {name:'Food Hygiene Audit', cat:'quality', checks:22, mins:25, last:'Last week', loc:'Canteen', icon:'clip', tone:'ic-green'},
+    {name:'Warehouse Inspection', cat:'facilities', checks:16, mins:15, last:'Yesterday', loc:'North Depot', icon:'box', tone:'ic-blue'},
+    {name:'Office Walkthrough', cat:'facilities', checks:11, mins:10, last:'3 days ago', loc:'Head Office', icon:'box', tone:'ic-blue'}
+  ];
+  var icons = {
+    shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    truck:'<path d="M5 17h14"/><path d="M6.5 17 8 10h8l1.5 7"/><circle cx="7.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/><path d="M9 10V7h6v3"/>',
+    clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
+    box:'<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>'
+  };
+  function iconSvg(name, size){
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icons[name] + '</svg>';
+  }
+
+  var templateList = document.getElementById('templateList');
+  var tFilter = 'all', tQuery = '';
+  function renderTemplates(){
+    var html = '';
+    templates.forEach(function(t){
+      if(tFilter !== 'all' && t.cat !== tFilter) return;
+      if(tQuery && t.name.toLowerCase().indexOf(tQuery) === -1) return;
+      html += '<button class="card" data-start-template="' + t.name + '"><div class="card-row">' +
+        '<span class="card-ic ' + t.tone + '">' + iconSvg(t.icon, 20) + '</span>' +
+        '<div class="card-main"><div class="card-title">' + t.name + '</div>' +
+        '<div class="card-meta">' + t.loc + ' · ' + t.checks + ' checks · ~' + t.mins + ' min</div>' +
+        '<div class="prog-meta"><span>Last: ' + t.last + '</span><span style="color:var(--blue);font-weight:800;">START ›</span></div></div></div></button>';
+    });
+    templateList.innerHTML = html || '<div class="empty-note">No templates match your search.</div>';
+    bindStartButtons();
+  }
+  function bindStartButtons(){
+    document.querySelectorAll('[data-start-template]').forEach(function(b){
+      b.addEventListener('click', function(){ startInspection(b.getAttribute('data-start-template')); });
+    });
+  }
+  document.getElementById('templateChips').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#templateChips .chip').forEach(function(c){ c.classList.remove('on'); });
+    chip.classList.add('on'); tFilter = chip.getAttribute('data-tcat'); renderTemplates();
+  });
+  document.getElementById('templateSearch').addEventListener('input', function(e){ tQuery = e.target.value.trim().toLowerCase(); renderTemplates(); });
+  renderTemplates(); bindStartButtons();
+
+  /* ---------- Checklist runner ---------- */
+  var checklistData = [
+    {section:'Personal protective equipment', q:'All workers wearing required PPE', hint:'Hard hats, hi-vis, boots and task-specific PPE where needed.'},
+    {section:'Personal protective equipment', q:'PPE in good condition', hint:'No damaged helmets, torn gloves or worn-out boots observed.'},
+    {section:'Work area', q:'Walkways and access routes clear', hint:'No trailing cables, stored materials or obstructions in walkways.'},
+    {section:'Work area', q:'Scaffold and edge protection secure', hint:'Guard rails complete, toe boards fitted, no damaged sections.'},
+    {section:'Work area', q:'Fire exits and signage unobstructed', hint:'Exits open freely, signage visible, extinguishers in place.'},
+    {section:'Equipment', q:'Tools and equipment in safe working order', hint:'No damaged cables, guards fitted, PAT labels in date.'},
+    {section:'Equipment', q:'Lifting equipment inspected and tagged', hint:'Chains, slings and hoists within inspection date.'},
+    {section:'Equipment', q:'Site secured and hazards fenced off', hint:'Excavations and hazards barriered, site boundary intact.'}
+  ];
+  var answers = {0:'pass', 1:'pass', 2:'na'};
+  var currentTemplate = 'Site Safety Inspection';
+  var checklistEl = document.getElementById('checklist');
+  function renderChecklist(){
+    var html = '', lastSection = '';
+    checklistData.forEach(function(item, i){
+      if(item.section !== lastSection){ html += '<div class="check-section">' + item.section + '</div>'; lastSection = item.section; }
+      var a = answers[i];
+      html += '<div class="check-item" data-idx="' + i + '">' +
+        '<div class="check-q">' + (i+1) + '. ' + item.q + '</div>' +
+        '<div class="check-hint">' + item.hint + '</div>' +
+        '<div class="seg">' +
+          '<button data-ans="pass" class="' + (a==='pass'?'sel-pass':'') + '">Pass</button>' +
+          '<button data-ans="fail" class="' + (a==='fail'?'sel-fail':'') + '">Fail</button>' +
+          '<button data-ans="na" class="' + (a==='na'?'sel-na':'') + '">N/A</button>' +
+        '</div>' +
+        '<div class="fail-note' + (a==='fail'?' show':'') + '">Failed item — an action will be created and assigned to the site manager when you submit.</div>' +
+        '<div class="evidence-row"><button class="ev-btn" data-ev="' + i + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>' +
+          '<span>Add photo</span></button></div></div>';
+    });
+    checklistEl.innerHTML = html;
+    checklistEl.querySelectorAll('.check-item').forEach(function(card){
+      var idx = card.getAttribute('data-idx');
+      card.querySelectorAll('.seg button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          answers[idx] = btn.getAttribute('data-ans');
+          renderChecklist(); updateRunnerProgress();
+        });
+      });
+      var ev = card.querySelector('.ev-btn');
+      ev.addEventListener('click', function(){
+        ev.classList.add('added');
+        ev.querySelector('span').textContent = 'Photo added ✓';
+        toast('Photo evidence attached');
+      });
+    });
+  }
+  function updateRunnerProgress(){
+    var total = checklistData.length;
+    var done = Object.keys(answers).length;
+    var pct = Math.round(done / total * 100);
+    document.getElementById('runnerBar').style.width = pct + '%';
+    document.getElementById('runnerPct').textContent = pct + '% answered';
+    document.getElementById('runnerCount').textContent = done + '/' + total;
+    document.getElementById('submitInspection').disabled = done < total;
+    document.getElementById('resumeBar').style.width = Math.max(38, pct) + '%';
+    document.getElementById('resumeText').textContent = done + ' of ' + total + ' checks answered';
+  }
+  function startInspection(name){
+    currentTemplate = name;
+    document.getElementById('runnerTitle').textContent = name;
+    go('runner');
+    toast('Inspection started — works offline');
+  }
+  document.getElementById('resumeCard').addEventListener('click', function(){ startInspection('Site Safety Inspection'); });
+  renderChecklist(); updateRunnerProgress();
+
+  document.getElementById('submitInspection').addEventListener('click', function(){
+    var pass = 0, fail = 0;
+    Object.keys(answers).forEach(function(k){ if(answers[k]==='pass') pass++; if(answers[k]==='fail') fail++; });
+    var scored = pass + fail;
+    var score = scored ? Math.round(pass / scored * 100) : 100;
+    document.getElementById('successScore').textContent = score + '%';
+    document.getElementById('successText').textContent = fail > 0
+      ? currentTemplate + ' recorded. ' + fail + ' failed item' + (fail>1?'s':'') + ' — action' + (fail>1?'s':'') + ' created and assigned to the site manager.'
+      : currentTemplate + ' recorded with no failed items. Great work.';
+    if(fail > 0){
+      actions.unshift({title:'Failed check — ' + currentTemplate, loc:'Riverside Site · Raised by inspection', pri:'high', status:'open', who:'SM', whoName:'Sarah M.', due:'Tomorrow', mine:false, fresh:true});
+      renderActions(); updateActionCounts();
+    }
+    var cl = document.getElementById('completedList');
+    var div = document.createElement('div');
+    div.className = 'card'; div.style.cursor = 'default';
+    div.innerHTML = '<div class="card-row"><span class="card-ic ic-green">' + iconSvg('clip',20) + '</span><div class="card-main"><div style="display:flex;justify-content:space-between;gap:8px;"><div class="card-title">' + currentTemplate + '</div><span class="pill pill-done">' + score + '%</span></div><div class="card-meta">Alex R. · Riverside Site · Just now' + (fail ? ' · ' + fail + ' action(s) raised' : '') + '</div></div></div>';
+    cl.insertBefore(div, cl.firstChild);
+    answers = {}; renderChecklist(); updateRunnerProgress();
+    document.getElementById('successOverlay').classList.add('open');
+  });
+  document.getElementById('successDone').addEventListener('click', function(){
+    document.getElementById('successOverlay').classList.remove('open'); go('home');
+  });
+
+  /* ---------- Actions ---------- */
+  var actions = [
+    {title:'Replace damaged guard rail', loc:'Riverside Site · Level 2 scaffold', pri:'high', status:'overdue', who:'AR', whoName:'Alex R. (you)', due:'Overdue · Yesterday', mine:true},
+    {title:'Replenish first aid station', loc:'Head Office · Ground floor', pri:'med', status:'open', who:'AR', whoName:'Alex R. (you)', due:'Due Fri 30 Oct', mine:true},
+    {title:'Book forklift annual service', loc:'North Depot · Asset AST-0098', pri:'med', status:'open', who:'JO', whoName:'James O.', due:'Due 02 Nov', mine:false},
+    {title:'Clear stored materials from fire exit', loc:'Riverside Site · East stairwell', pri:'high', status:'open', who:'PK', whoName:'Priya K.', due:'Due today', mine:false},
+    {title:'Replace faded safety signage', loc:'Depot Yard · Entrance', pri:'low', status:'open', who:'AR', whoName:'Alex R. (you)', due:'Due 06 Nov', mine:true},
+    {title:'Submit COSHH assessment for new solvent', loc:'Workshop · Raised by audit', pri:'med', status:'overdue', who:'SM', whoName:'Sarah M.', due:'Overdue · 2 days', mine:false},
+    {title:'Fit new reversing camera — Transit Van', loc:'Depot Yard · Asset AST-0142', pri:'low', status:'done', who:'JO', whoName:'James O.', due:'Completed 22 Oct', mine:false}
+  ];
+  var avColors = {AR:'#2563eb', SM:'#12805c', JO:'#7c4a03', PK:'#0e7c86'};
+  var aFilter = 'all';
+  var actionList = document.getElementById('actionList');
+  function statusPill(a){
+    if(a.status === 'done') return '<span class="pill pill-done">Done</span>';
+    if(a.status === 'overdue') return '<span class="pill pill-overdue">Overdue</span>';
+    return '<span class="pill pill-open">Open</span>';
+  }
+  function priPill(p){
+    if(p === 'high') return '<span class="pill pill-high">High</span>';
+    if(p === 'med') return '<span class="pill pill-med">Medium</span>';
+    return '<span class="pill pill-low">Low</span>';
+  }
+  function actionCard(a){
+    return '<div class="card" style="cursor:default;"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
+      '<div class="card-title">' + a.title + '</div>' + statusPill(a) + '</div>' +
+      '<div class="card-meta">' + a.loc + '</div>' +
+      '<div class="assignee"><span class="mini-av" style="background:' + (avColors[a.who]||'#66748e') + '">' + a.who + '</span><span>' + a.whoName + '</span>' +
+      '<span style="margin-left:2px;">' + priPill(a.pri) + '</span>' +
+      '<span class="due-chip' + (a.status==='overdue'?' late':'') + '">' + a.due + '</span></div>' +
+      (a.status !== 'done' ? '<button class="ev-btn mark-done" style="width:100%;margin-top:11px;border-style:solid;">Mark as done</button>' : '') +
+      '</div>';
+  }
+  function renderActions(){
+    var filtered = actions.filter(function(a){
+      if(aFilter === 'all') return true;
+      if(aFilter === 'mine') return a.mine && a.status !== 'done';
+      if(aFilter === 'done') return a.status === 'done';
+      return a.status === aFilter;
+    });
+    actionList.innerHTML = filtered.length ? filtered.map(actionCard).join('') : '<div class="empty-note">Nothing here right now.<br>New items will appear as inspections raise them.</div>';
+    actionList.querySelectorAll('.mark-done').forEach(function(btn, i){
+      btn.addEventListener('click', function(){
+        filtered[i].status = 'done'; filtered[i].due = 'Completed just now';
+        renderActions(); renderHomeActions(); updateActionCounts(); toast('Action marked as done');
+      });
+    });
+    renderHomeActions();
+  }
+  function renderHomeActions(){
+    var mine = actions.filter(function(a){ return a.mine && a.status !== 'done'; }).slice(0,2);
+    document.getElementById('homeActions').innerHTML = mine.map(actionCard).join('');
+    document.querySelectorAll('#homeActions .mark-done').forEach(function(btn, i){
+      btn.addEventListener('click', function(){
+        mine[i].status = 'done'; mine[i].due = 'Completed just now';
+        renderActions(); updateActionCounts(); toast('Action marked as done');
+      });
+    });
+  }
+  function updateActionCounts(){
+    var open = actions.filter(function(a){ return a.status !== 'done'; }).length;
+    document.getElementById('openActionCount').textContent = open;
+    document.getElementById('tabBadge').textContent = open;
+    document.getElementById('tabBadge').style.display = open ? 'grid' : 'none';
+  }
+  document.getElementById('actionChips').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#actionChips .chip').forEach(function(c){ c.classList.remove('on'); });
+    chip.classList.add('on'); aFilter = chip.getAttribute('data-afilter'); renderActions();
+  });
+  renderActions(); updateActionCounts();
+
+  /* ---------- Assets ---------- */
+  var assets = [
+    {code:'AST-0142', name:'Transit Van — YK24 DBO', cat:'Vehicles', status:'ok', statusLabel:'Operational', loc:'Depot Yard', service:'14 Mar 2027', last:'Today · Daily check passed'},
+    {code:'AST-0098', name:'Counterbalance Forklift 2.5t', cat:'Plant', status:'due', statusLabel:'Due service', loc:'North Depot', service:'28 Oct 2026', last:'12 Oct · Pre-start passed'},
+    {code:'AST-0217', name:'Tower Scaffold — 6.2m', cat:'Access', status:'ok', statusLabel:'Operational', loc:'Riverside Site', service:'09 Jan 2027', last:'Yesterday · Weekly check passed'},
+    {code:'AST-0051', name:'Fire Extinguisher — CO₂ (x6)', cat:'Safety', status:'ok', statusLabel:'Operational', loc:'Head Office', service:'30 Jun 2027', last:'11 Oct · Monthly check passed'},
+    {code:'AST-0176', name:'Mini Excavator 1.7t', cat:'Plant', status:'out', statusLabel:'Out of service', loc:'Workshop · Awaiting parts', service:'On hold', last:'20 Oct · Fault reported'},
+    {code:'AST-0230', name:'Platform Ladder — 8 step', cat:'Access', status:'due', statusLabel:'Due service', loc:'North Depot', service:'31 Oct 2026', last:'05 Oct · Check passed'}
+  ];
+  var assetFilter = 'all', selectedAsset = assets[0];
+  var assetList = document.getElementById('assetList');
+  function renderAssets(){
+    var html = '';
+    assets.forEach(function(a){
+      if(assetFilter !== 'all' && a.status !== assetFilter) return;
+      var pill = a.status === 'ok' ? 'pill-ok' : (a.status === 'due' ? 'pill-due' : 'pill-out');
+      html += '<button class="card" data-asset="' + a.code + '"><div class="card-row">' +
+        '<span class="card-ic ic-teal">' + iconSvg('box',20) + '</span>' +
+        '<div class="card-main"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div class="card-title">' + a.name + '</div><span class="pill ' + pill + '">' + a.statusLabel + '</span></div>' +
+        '<div class="card-meta">' + a.code + ' · ' + a.cat + ' · ' + a.loc + '</div>' +
+        '<div class="prog-meta"><span>Next service: ' + a.service + '</span></div></div></div></button>';
+    });
+    assetList.innerHTML = html || '<div class="empty-note">No assets in this category.</div>';
+    assetList.querySelectorAll('[data-asset]').forEach(function(b){
+      b.addEventListener('click', function(){
+        selectedAsset = assets.filter(function(x){ return x.code === b.getAttribute('data-asset'); })[0];
+        openAsset(selectedAsset);
+      });
+    });
+  }
+  document.getElementById('assetChips').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip'); if(!chip) return;
+    document.querySelectorAll('#assetChips .chip').forEach(function(c){ c.classList.remove('on'); });
+    chip.classList.add('on'); assetFilter = chip.getAttribute('data-acat'); renderAssets();
+  });
+  function openAsset(a){
+    document.getElementById('assetTitle').textContent = a.name;
+    var st = document.getElementById('assetStatus');
+    st.textContent = a.statusLabel;
+    st.className = 'pill ' + (a.status === 'ok' ? 'pill-ok' : (a.status === 'due' ? 'pill-due' : 'pill-out'));
+    document.getElementById('assetCode').textContent = a.code + ' · ' + a.cat;
+    document.getElementById('assetMeta').textContent = 'Scan the QR label on this asset to open this record on site.';
+    document.getElementById('assetLoc').textContent = 'Location: ' + a.loc;
+    document.getElementById('assetService').textContent = a.service;
+    document.getElementById('assetLast').textContent = a.last.split('·')[0].trim();
+    document.getElementById('assetHistory').innerHTML =
+      '<div class="notif-item" style="padding-top:2px;"><span class="card-ic ic-green" style="width:38px;height:38px;">' + iconSvg('clip',17) + '</span><div><p><b>' + a.last + '</b></p><div class="n-time">Inspection record</div></div></div>' +
+      '<div class="notif-item" style="padding-bottom:2px;"><span class="card-ic ic-blue" style="width:38px;height:38px;">' + iconSvg('box',17) + '</span><div><p>Service and maintenance history up to date.</p><div class="n-time">Next due ' + a.service + '</div></div></div>';
+    go('asset');
+  }
+  renderAssets();
+  document.getElementById('assetInspectBtn').addEventListener('click', function(){ startInspection('Vehicle Daily Check'); });
+  document.getElementById('assetIssueBtn').addEventListener('click', function(){
+    document.getElementById('issueTitle').value = 'Issue with ' + selectedAsset.name;
+    openSheet('issueSheet');
+  });
+
+  /* ---------- Training ---------- */
+  var courses = [
+    {name:'Manual Handling', meta:'4 modules · ~35 min', pct:75, state:'Continue'},
+    {name:'Working at Height', meta:'3 modules · ~25 min · Renewal due in 14 days', pct:100, state:'Review'},
+    {name:'COSHH Basics', meta:'5 modules · ~40 min', pct:20, state:'Continue'},
+    {name:'Fire Awareness', meta:'3 modules · ~20 min', pct:100, state:'Completed'}
+  ];
+  var courseList = document.getElementById('courseList');
+  function renderCourses(){
+    courseList.innerHTML = courses.map(function(c, i){
+      var done = c.pct >= 100;
+      return '<div class="card" style="cursor:default;"><div class="card-row">' +
+        '<span class="card-ic ic-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.5"/></svg></span>' +
+        '<div class="card-main"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;"><div class="card-title">' + c.name + '</div>' +
+        (done ? '<span class="pill pill-done">Complete</span>' : '<span class="pill pill-progress">' + c.pct + '%</span>') + '</div>' +
+        '<div class="card-meta">' + c.meta + '</div>' +
+        '<div class="progress"><i style="width:' + c.pct + '%"></i></div>' +
+        (done ? '' : '<button class="ev-btn course-go" data-course="' + i + '" style="width:100%;margin-top:11px;border-style:solid;">' + c.state + ' course</button>') +
+        '</div></div></div>';
+    }).join('');
+    courseList.querySelectorAll('.course-go').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var c = courses[parseInt(btn.getAttribute('data-course'), 10)];
+        c.pct = Math.min(100, c.pct + 25);
+        if(c.pct >= 100){ c.state = 'Completed'; toast(c.name + ' complete — certificate issued'); }
+        else toast('Module complete — ' + c.pct + '% of ' + c.name);
+        renderCourses();
+      });
+    });
+  }
+  renderCourses();
+
+  /* ---------- Sheets ---------- */
+  var veil = document.getElementById('veil');
+  function openSheet(id){
+    closeSheets();
+    veil.classList.add('open');
+    document.getElementById(id).classList.add('open');
+  }
+  function closeSheets(){
+    veil.classList.remove('open');
+    document.querySelectorAll('.sheet').forEach(function(s){ s.classList.remove('open'); });
+  }
+  veil.addEventListener('click', closeSheets);
+  document.getElementById('bellBtn').addEventListener('click', function(){ openSheet('notifSheet'); });
+  document.getElementById('notifClose').addEventListener('click', function(){
+    closeSheets();
+    document.querySelector('#bellBtn .dot').style.display = 'none';
+    toast('Notifications marked as read');
+  });
+  document.getElementById('quickReport').addEventListener('click', function(){ openSheet('issueSheet'); });
+  fab.addEventListener('click', function(){ openSheet('issueSheet'); });
+  document.getElementById('issuePhotoBtn').addEventListener('click', function(){
+    this.classList.add('added'); this.lastChild.textContent = ' Photo attached ✓';
+    toast('Photo evidence attached');
+  });
+  document.getElementById('issueForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var title = document.getElementById('issueTitle');
+    var f = document.getElementById('fTitle');
+    if(!title.value.trim()){ f.classList.add('invalid'); title.focus(); return; }
+    f.classList.remove('invalid');
+    var loc = document.getElementById('issueLoc').value.trim() || 'Riverside Site';
+    var pri = document.getElementById('issuePri').value;
+    var assign = document.getElementById('issueAssign').value;
+    var mine = assign.indexOf('Me') === 0;
+    var whoMap = {'Me (Alex R.)':'AR','Sarah M. — Site Manager':'SM','James O. — Supervisor':'JO','Priya K. — H&S Lead':'PK'};
+    actions.unshift({title: title.value.trim(), loc: loc + ' · Reported just now', pri: pri, status:'open',
+      who: whoMap[assign] || 'AR', whoName: assign.replace('Me (Alex R.)','Alex R. (you)').split(' — ')[0] + (mine ? ' (you)' : ''), due:'Due this week', mine: mine});
+    renderActions(); updateActionCounts(); closeSheets();
+    title.value = ''; document.getElementById('issueLoc').value = '';
+    go('actions'); aFilter = 'all';
+    document.querySelectorAll('#actionChips .chip').forEach(function(c){ c.classList.toggle('on', c.getAttribute('data-afilter') === 'all'); });
+    renderActions();
+    toast('Issue reported — added to Actions');
+  });
+
+  /* ---------- Scanner ---------- */
+  var scanner = document.getElementById('scanner');
+  function openScanner(){ scanner.classList.add('open'); }
+  document.getElementById('quickScan').addEventListener('click', openScanner);
+  document.getElementById('scanBtn2').addEventListener('click', openScanner);
+  document.getElementById('scanCancel').addEventListener('click', function(){ scanner.classList.remove('open'); });
+  document.getElementById('scanSimBtn').addEventListener('click', function(){
+    scanner.classList.remove('open');
+    selectedAsset = assets[1];
+    openAsset(selectedAsset);
+    toast('Asset recognised — AST-0098');
+  });
+
+  /* ---------- Home search shortcut ---------- */
+  document.getElementById('homeSearch').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); go('inspections'); document.getElementById('templateSearch').value = this.value; tQuery = this.value.trim().toLowerCase(); renderTemplates(); }
+  });
+
+  /* ---------- Misc ---------- */
+  document.getElementById('exportBtn').addEventListener('click', function(){ toast('Report export started — PDF will be emailed to you'); });
+  document.getElementById('syncBtn').addEventListener('click', function(){
+    document.getElementById('syncText').textContent = 'Syncing…';
+    setTimeout(function(){ document.getElementById('syncText').textContent = 'All data synced · Just now'; toast('Everything is synced'); }, 900);
+  });
+  document.getElementById('teamBtn').addEventListener('click', function(){ toast('Team & Sites — available in the full build'); });
+  document.getElementById('settingsBtn').addEventListener('click', function(){ toast('Settings — available in the full build'); });
+  document.getElementById('signOutBtn').addEventListener('click', function(){ toast('Signed out (demo — you are still exploring)'); go('home'); });
+})();
+</script>
+</body>
+</html>
